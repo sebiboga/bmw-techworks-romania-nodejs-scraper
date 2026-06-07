@@ -1,4 +1,47 @@
+# Dependencies
 node_modules/
-tmp/
+
+# Environment
+.env
 .env.local
+.env.*.local
+
+# Temp / output
+tmp/
+tmp/*.json
+company.json
+
+# Build / output
+dist/
+build/
+out/
+
+# Test reports
 test-report.html
+test-report.xml
+coverage/
+*. coverage/
+
+# OS
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+
+# IDE
+.vscode/
+.idea/
+*.iml
+.project
+.classpath
+.settings/
+
+# Logs
+*.log
+npm-debug.log*
+
+# Credentials
+*.pem
+*.key
+*.cert

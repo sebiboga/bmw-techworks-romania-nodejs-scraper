@@ -1,0 +1,5 @@
+# Default owner for all files
+* @sebiboga
+
+# GitHub Actions workflows
+.github/workflows/* @sebiboga
