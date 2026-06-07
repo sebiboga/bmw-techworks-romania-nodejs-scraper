@@ -1,6 +1,16 @@
 import { jest, describe, it, expect, beforeAll } from "@jest/globals";
 import { fetchJobsFeed, mapToJobModel, extractTags } from "../../index.js";
 
+const SOLR_AUTH = process.env.SOLR_AUTH;
+
+function itIfSolr(name, fn, timeout) {
+  if (SOLR_AUTH) {
+    it(name, fn, timeout);
+  } else {
+    it.skip(name + " (SOLR_AUTH not set)", fn);
+  }
+}
+
 beforeAll(() => {
   jest.setTimeout(30000);
 });
@@ -12,7 +22,7 @@ describe("Integration: BMW scraper workflow", () => {
     expect(items.length).toBeGreaterThan(0);
 
     const jobs = items.map(item =>
-      mapToJobModel(item, "49775344", "BMW TECHWORKS ROMANIA SRL")
+      mapToJobModel(item, "49775344", "BMW TECHWORKS ROMANIA S.R.L.")
     );
 
     const urls = jobs.map(j => j.url);
@@ -21,7 +31,7 @@ describe("Integration: BMW scraper workflow", () => {
     for (const job of jobs) {
       expect(job.title).toBeTruthy();
       expect(job.url).toContain("careers.bmwtechworks.ro");
-      expect(job.company).toBe("BMW TECHWORKS ROMANIA SRL");
+      expect(job.company).toBe("BMW TECHWORKS ROMANIA S.R.L.");
       expect(job.cif).toBe("49775344");
       expect(job.workmode).toBe("hybrid");
     }
@@ -42,5 +52,12 @@ describe("Integration: BMW scraper workflow", () => {
         expect(tags).toContain(tag);
       }
     }
+  });
+
+  itIfSolr("should query SOLR and find BMW jobs by CIF", async () => {
+    const { querySOLR } = await import("../../solr.js");
+    const result = await querySOLR("49775344");
+    expect(result.numFound).toBeGreaterThan(0);
+    console.log(`Found ${result.numFound} BMW jobs in SOLR`);
   });
 });

@@ -22,7 +22,7 @@ Feed: https://careers.bmwtechworks.ro/jobs.json
 6. **Scrape jobs** - Fetch JSON Feed from careers.bmwtechworks.ro
 7. **Map to job model** - Transform scraped data to the Peviitor job model
 8. **Upsert jobs to SOLR** - Push jobs to SOLR (upsert by URL)
-9. **Fix company data** - Repair any AROBS jobs in SOLR with missing/incomplete company name or CIF
+9. **Fix company data** - Repair any BMW jobs in SOLR with missing/incomplete company name or CIF
 
 ## Environment
 

@@ -1,4 +1,4 @@
-import { jest, describe, it, expect, beforeEach, afterEach } from "@jest/globals";
+import { jest, describe, it, expect } from "@jest/globals";
 import { getCompanyBrand } from "../../company.js";
 
 describe("getCompanyBrand", () => {
