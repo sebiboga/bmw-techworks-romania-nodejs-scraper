@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BMW TechWorks Romania - Peviitor Scraper</title>
+  <link rel="icon" type="image/x-icon" href="https://peviitor.ro/favicon.ico">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f5f5f5; color: #333; line-height: 1.6; }
+    header { background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); color: white; padding: 3rem 0; text-align: center; }
+    header h1 { font-size: 2rem; margin-bottom: 0.5rem; }
+    header p { opacity: 0.8; font-size: 1.1rem; }
+    .container { max-width: 1000px; margin: 0 auto; padding: 2rem; }
+    .card { background: white; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); padding: 2rem; margin-bottom: 2rem; }
+    .card h2 { color: #1a1a2e; margin-bottom: 1.5rem; padding-bottom: 0.5rem; border-bottom: 2px solid #e0e0e0; }
+    .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem; margin-bottom: 2rem; }
+    .stat { background: white; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); padding: 1.5rem; text-align: center; }
+    .stat .value { font-size: 2.5rem; font-weight: bold; color: #1a1a2e; }
+    .stat .label { color: #666; margin-top: 0.25rem; }
+    .info-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem; }
+    .info-item { display: flex; flex-direction: column; padding: 0.75rem; background: #f9f9f9; border-radius: 6px; }
+    .info-item .label { font-size: 0.8rem; color: #888; text-transform: uppercase; letter-spacing: 0.5px; }
+    .info-item .value { font-size: 1rem; font-weight: 500; margin-top: 0.25rem; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { padding: 0.75rem; text-align: left; border-bottom: 1px solid #e0e0e0; }
+    th { background: #f5f5f5; font-weight: 600; font-size: 0.85rem; text-transform: uppercase; color: #666; }
+    td { font-size: 0.9rem; }
+    .badge { display: inline-block; padding: 0.2rem 0.6rem; border-radius: 12px; font-size: 0.75rem; font-weight: 600; }
+    .badge-hybrid { background: #e3f2fd; color: #1565c0; }
+    .badge-senior { background: #fff3e0; color: #e65100; }
+    .badge-it { background: #e8f5e9; color: #2e7d32; }
+    footer { text-align: center; padding: 2rem; color: #888; font-size: 0.85rem; }
+    .loading { text-align: center; padding: 2rem; color: #888; }
+    .error { color: #d32f2f; text-align: center; padding: 2rem; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>BMW TechWorks Romania</h1>
+    <p>Scraper peviitor.ro</p>
+  </header>
+
+  <div class="container">
+    <div class="stats" id="stats">
+      <div class="stat"><div class="value" id="jobCount">-</div><div class="label">Joburi active</div></div>
+      <div class="stat"><div class="value" id="lastScraped">-</div><div class="label">Ultima actualizare</div></div>
+      <div class="stat"><div class="value" id="status">-</div><div class="label">Status</div></div>
+    </div>
+
+    <div class="card">
+      <h2>Informații Companie</h2>
+      <div class="info-grid">
+        <div class="info-item"><span class="label">Denumire</span><span class="value">BMW TECHWORKS ROMANIA SRL</span></div>
+        <div class="info-item"><span class="label">CIF</span><span class="value">49775344</span></div>
+        <div class="info-item"><span class="label">Brand</span><span class="value">BMW TechWorks Romania</span></div>
+        <div class="info-item"><span class="label">Localitate</span><span class="value">Cluj-Napoca</span></div>
+        <div class="info-item"><span class="label">Website</span><span class="value"><a href="https://www.bmwtechworks.ro">bmwtechworks.ro</a></span></div>
+        <div class="info-item"><span class="label">Cariere</span><span class="value"><a href="https://careers.bmwtechworks.ro/jobs">careers.bmwtechworks.ro</a></span></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Joburi Active</h2>
+      <div id="jobsList" class="loading">Se încarcă...</div>
+    </div>
+  </div>
+
+  <footer>
+    Date furnizate de <a href="https://peviitor.ro">peviitor.ro</a> |
+    <a href="https://github.com/sebiboga/bmw-techworks-romania-nodejs-scraper">GitHub</a>
+  </footer>
+
+  <script>
+    async function loadData() {
+      try {
+        const res = await fetch('https://api.peviitor.ro/v1/search/?q=BMW+TechWorks&page=1');
+        const data = await res.json();
+        const docs = data.response?.docs || [];
+        const now = new Date();
+
+        document.getElementById('jobCount').textContent = docs.length;
+        document.getElementById('lastScraped').textContent = now.toLocaleDateString('ro-RO');
+        document.getElementById('status').textContent = 'Activ';
+        document.getElementById('status').style.color = '#2e7d32';
+
+        if (docs.length === 0) {
+          document.getElementById('jobsList').innerHTML = '<p>Nu există joburi active momentan.</p>';
+          return;
+        }
+
+        let html = '<table><thead><tr><th>Titlu</th><th>Workmode</th><th>Data</th></tr></thead><tbody>';
+        for (const job of docs) {
+          const date = job.date ? new Date(job.date).toLocaleDateString('ro-RO') : '-';
+          html += `<tr>
+            <td><a href="${job.url}" target="_blank">${job.title || '-'}</a></td>
+            <td><span class="badge badge-hybrid">${job.workmode || 'hybrid'}</span></td>
+            <td>${date}</td>
+          </tr>`;
+        }
+        html += '</tbody></table>';
+        document.getElementById('jobsList').innerHTML = html;
+      } catch (err) {
+        document.getElementById('stats').innerHTML = `<div class="error">Eroare la încărcarea datelor: ${err.message}</div>`;
+        document.getElementById('jobsList').innerHTML = '<div class="error">Nu s-au putut încărca joburile.</div>';
+      }
+    }
+
+    loadData();
+  </script>
+</body>
+</html>
