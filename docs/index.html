@@ -51,7 +51,7 @@
     <div class="card">
       <h2>Informații Companie</h2>
       <div class="info-grid">
-        <div class="info-item"><span class="label">Denumire</span><span class="value">BMW TECHWORKS ROMANIA SRL</span></div>
+        <div class="info-item"><span class="label">Denumire</span><span class="value">BMW TECHWORKS ROMANIA S.R.L.</span></div>
         <div class="info-item"><span class="label">CIF</span><span class="value">49775344</span></div>
         <div class="info-item"><span class="label">Brand</span><span class="value">BMW TechWorks Romania</span></div>
         <div class="info-item"><span class="label">Localitate</span><span class="value">Cluj-Napoca</span></div>
@@ -74,12 +74,12 @@
   <script>
     async function loadData() {
       try {
-        const res = await fetch('https://api.peviitor.ro/v1/search/?q=BMW+TechWorks&page=1');
+        const res = await fetch('https://api.peviitor.ro/v1/search/?company=BMW%20TECHWORKS%20ROMANIA%20S.R.L.&rows=200&page=1');
         const data = await res.json();
         const docs = data.response?.docs || [];
         const now = new Date();
 
-        document.getElementById('jobCount').textContent = docs.length;
+        document.getElementById('jobCount').textContent = data.response?.numFound || docs.length;
         document.getElementById('lastScraped').textContent = now.toLocaleDateString('ro-RO');
         document.getElementById('status').textContent = 'Activ';
         document.getElementById('status').style.color = '#2e7d32';
