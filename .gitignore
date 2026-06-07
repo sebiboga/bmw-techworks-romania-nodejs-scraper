@@ -46,5 +46,6 @@ bmw_response.json
 
 # Credentials (NEVER commit these)
 *.pem
+company.json
 *.key
 credentials.json

@@ -18,7 +18,7 @@ NEVER use paths outside the project.
 - Push after commit
 
 ### 3. Environment Variables
-- `SOLR_AUTH` must be set in `.env.local` for SOLR tests (format: `user:password`)
+- `SOLR_AUTH` must be set in `.env.local` for SOLR tests
 - `.env.local` is in `.gitignore` — never commit it
 
 ### 4. Testing

@@ -28,5 +28,5 @@ Feed: https://careers.bmwtechworks.ro/jobs.json
 
 Create `.env.local` with:
 ```
-SOLR_AUTH=solr:your-solr-credentials
+SOLR_AUTH=your-solr-credentials
 ```

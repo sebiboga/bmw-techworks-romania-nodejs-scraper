@@ -8,7 +8,7 @@
 import fetch from "node-fetch";
 
 const SOLR_URL = "https://solr.peviitor.ro/solr/job/update";
-const SOLR_AUTH = process.env.SOLR_AUTH || "solr:your-solr-credentials";
+const SOLR_AUTH = process.env.SOLR_AUTH;
 const COMPANY_NAME = "BMW TECHWORKS ROMANIA S.R.L.";
 
 async function getJobs() {
@@ -47,7 +47,7 @@ async function checkUrl(url) {
 }
 
 async function deleteJobFromSolr(url) {
-  const AUTH = process.env.SOLR_AUTH || "solr:your-solr-credentials";
+  const AUTH = process.env.SOLR_AUTH;
   const params = new URLSearchParams({ commit: "true" });
 
   const deleteQuery = JSON.stringify({
