@@ -8,6 +8,7 @@ import { fixBmwJobs } from "./fix-bmw-data.js";
 const COMPANY_CIF = "49775344";
 const COMPANY_BRAND = "BMW TechWorks Romania";
 const JOB_FEED_URL = "https://careers.bmwtechworks.ro/jobs.json";
+const TIMEOUT = 10000;
 
 let COMPANY_NAME = null;
 
@@ -90,9 +91,16 @@ async function main() {
   try {
     fs.mkdirSync("tmp", { recursive: true });
 
-    console.log("=== Step 1: Validate company via ANAF ===");
-    const { company, cif } = await validateAndGetCompany();
+    console.log("=== Step 1: Get existing jobs count ===");
+    const existingResult = await querySOLR(COMPANY_CIF);
+    const existingCount = existingResult.numFound;
+    console.log(`Found ${existingCount} existing jobs in SOLR`);
+    console.log("(Keeping existing jobs - will upsert BMW jobs only)");
+
+    console.log("=== Step 2: Validate company via ANAF ===");
+    const { company, cif, address } = await validateAndGetCompany();
     COMPANY_NAME = company;
+    const localCif = cif;
 
     try {
       await upsertCompany({
@@ -100,45 +108,46 @@ async function main() {
         company,
         brand: COMPANY_BRAND,
         status: "activ",
-        location: ["Cluj-Napoca"],
+        location: address ? [address] : ["Cluj-Napoca"],
         website: ["https://www.bmwtechworks.ro"],
         career: ["https://careers.bmwtechworks.ro/jobs"],
         lastScraped: new Date().toISOString().split('T')[0],
-        scraperFile: "https://raw.githubusercontent.com/sebiboga/bmw-techworks-romania-nodejs-scraper/master/.github/workflows/scrape.yml"
+        scraperFile: "https://raw.githubusercontent.com/sebiboga/bmw-techworks-romania-nodejs-scraper/main/.github/workflows/scrape.yml"
       });
     } catch (err) {
-      console.log(`Note: Could not upsert company: ${err.message}`);
+      console.log(`Note: Could not upsert company to SOLR core: ${err.message}`);
     }
 
-    console.log("\n=== Step 2: Fetch jobs from JSON Feed ===");
+    console.log("\n=== Step 3: Fetch jobs from JSON Feed ===");
     const feed = await fetchJobsFeed();
     const items = feed.items || [];
-    console.log(`Found ${items.length} jobs in feed`);
+    console.log(`Jobs scraped from BMW Careers website: ${items.length}`);
 
-    const jobs = items.map(item => mapToJobModel(item, cif, COMPANY_NAME));
+    const jobs = items.map(item => mapToJobModel(item, localCif, COMPANY_NAME));
 
     const payload = {
       source: "careers.bmwtechworks.ro",
       scrapedAt: new Date().toISOString(),
       company: COMPANY_NAME,
-      cif,
+      cif: localCif,
       jobs
     };
 
     fs.writeFileSync("tmp/jobs.json", JSON.stringify(payload, null, 2), "utf-8");
     console.log("Saved tmp/jobs.json");
 
-    console.log("\n=== Step 3: Upsert jobs to SOLR ===");
+    console.log("\n=== Step 4: Upsert jobs to SOLR ===");
     await upsertJobs(jobs);
     console.log(`✅ Upserted ${jobs.length} jobs to SOLR`);
 
-    const existingResult = await querySOLR(cif);
+    const finalResult = await querySOLR(localCif);
     console.log(`\n=== SUMMARY ===`);
-    console.log(`Jobs collected: ${jobs.length}`);
-    console.log(`Jobs in SOLR for CIF ${cif}: ${existingResult.numFound}`);
+    console.log(`Jobs existing in SOLR before scrape: ${existingCount}`);
+    console.log(`Jobs scraped from BMW website: ${items.length}`);
+    console.log(`Jobs in SOLR after scrape: ${finalResult.numFound}`);
     console.log(`====================`);
 
-    await fixBmwJobs(COMPANY_NAME, cif);
+    await fixBmwJobs(COMPANY_NAME, localCif);
 
     console.log("\n=== DONE ===");
     console.log("Scraper completed successfully!");

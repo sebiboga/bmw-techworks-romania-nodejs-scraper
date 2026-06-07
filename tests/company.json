@@ -1,0 +1,96 @@
+{
+  "validatedAt": "2026-06-07T12:00:00.000Z",
+  "source": "ANAF",
+  "brand": "BMW TechWorks Romania",
+  "anaf": {
+    "cui": 49775344,
+    "name": "BMW TECHWORKS ROMANIA S.R.L.",
+    "address": "JUDEŢUL CLUJ, MUNICIPIUL CLUJ-NAPOCA, STRADA ŞTEFAN CEL MARE, NR.28",
+    "registrationNumber": "J12/1234/2020",
+    "phone": "",
+    "fax": "",
+    "postalCode": "400123",
+    "caenCode": "2620",
+    "iban": "",
+    "registrationState": "INREGISTRAT din data 01.01.2020",
+    "registrationDate": "2020-01-01",
+    "fiscalAuthority": "Direcţia Generală a Finanţelor Publice Cluj",
+    "ownershipForm": "PROPR.PRIVATA-CAPITAL PRIVAT STRAIN",
+    "organizationForm": "PERSOANA JURIDICA",
+    "legalForm": "SOCIETATE COMERCIALĂ CU RĂSPUNDERE LIMITATĂ",
+    "vatRegistered": true,
+    "vatPeriods": [
+      {
+        "start": "2020-01-01",
+        "end": null,
+        "yearStart": "",
+        "message": ""
+      }
+    ],
+    "cashBasisVat": false,
+    "cashBasisVatStart": null,
+    "cashBasisVatEnd": null,
+    "inactive": false,
+    "inactiveSince": null,
+    "reactivatedSince": null,
+    "splitVat": false,
+    "eFacturaRegistered": false,
+    "headquartersAddress": {
+      "street": "Strada Ştefan cel Mare",
+      "number": "28",
+      "locality": "Cluj-Napoca",
+      "county": "CLUJ",
+      "country": "",
+      "postalCode": "400123"
+    },
+    "fiscalAddress": {
+      "street": "",
+      "number": "",
+      "locality": "",
+      "county": "",
+      "country": "",
+      "postalCode": ""
+    },
+    "administrators": [
+      {
+        "name": "ADMINISTRATOR BMW",
+        "role": "administrator"
+      }
+    ],
+    "authorizedCaenCodes": [
+      "2620",
+      "6201",
+      "6202",
+      "6209",
+      "7022"
+    ],
+    "onrcStatus": 1048,
+    "onrcStatusLabel": "Funcțiune"
+  },
+  "peviitor": {
+    "id": "49775344",
+    "company": "BMW TECHWORKS ROMANIA S.R.L.",
+    "brand": "BMW TechWorks Romania",
+    "group": "BMW Group",
+    "status": "activ",
+    "location": ["Cluj-Napoca"],
+    "website": ["https://www.bmwtechworks.ro"],
+    "career": ["https://careers.bmwtechworks.ro/jobs"],
+    "lastScraped": "2026-06-07",
+    "scraperFile": "https://raw.githubusercontent.com/sebiboga/bmw-techworks-romania-nodejs-scraper/main/.github/workflows/scrape.yml",
+    "_version_": 1862291263324160000,
+    "_root_": "49775344"
+  },
+  "summary": {
+    "company": "BMW TECHWORKS ROMANIA S.R.L.",
+    "cif": "49775344",
+    "active": true,
+    "inactiveSince": null,
+    "reactivatedSince": null,
+    "address": "JUDEŢUL CLUJ, MUNICIPIUL CLUJ-NAPOCA, STRADA ŞTEFAN CEL MARE, NR.28",
+    "registrationNumber": "J12/1234/2020",
+    "caenCode": "2620",
+    "vatRegistered": true,
+    "eFacturaRegistered": false
+  }
+}

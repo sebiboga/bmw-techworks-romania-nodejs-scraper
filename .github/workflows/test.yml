@@ -1,19 +1,142 @@
-name: test-bmw-techworks-ro
+name: Automation Tests
 
 on:
+  schedule:
+    - cron: '0 7 * * *'
   push:
-    branches: [main, dev]
+    branches: [main]
   pull_request:
     branches: [main]
+    types: [opened, synchronize, reopened]
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Dry run mode (no deletions)'
+        required: true
+        default: 'true'
 
 jobs:
-  test:
+  validate-jobs:
     runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch' || github.event_name == 'schedule'
+    
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v5
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v5
         with:
-          node-version: 20
-          cache: npm
-      - run: npm ci
-      - run: npm test
+          node-version: '24'
+          
+      - name: Install dependencies
+        run: npm install
+        
+      - name: Validate and remove expired jobs
+        run: |
+          if [ "${{ github.event_name }}" == "schedule" ]; then
+            echo "Schedule trigger — running LIVE mode..."
+            node --no-deprecation validate-jobs.js 49775344 --delete
+          elif [ "${{ github.event.inputs.dry_run }}" == "true" ]; then
+            echo "Running in DRY RUN mode..."
+            node --no-deprecation validate-jobs.js 49775344 --dry-run
+          else
+            echo "Running in LIVE mode (will delete expired jobs)..."
+            node --no-deprecation validate-jobs.js 49775344 --delete
+          fi
+        env:
+          SOLR_AUTH: ${{ secrets.SOLR_AUTH }}
+
+  ensure-company-core:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Ensure BMW exists in company core
+        env:
+          SOLR_AUTH: ${{ secrets.SOLR_AUTH }}
+        run: |
+          EXISTING=$(curl -s --user "${SOLR_AUTH}" \
+            "https://solr.peviitor.ro/solr/company/select?q=id:49775344&rows=1" | jq '.response.numFound')
+          
+          echo "BMW count in company core: $EXISTING"
+          
+          if [ "$EXISTING" -eq "0" ]; then
+            echo "BMW not found - adding to company core..."
+            echo '[{"id":"49775344","company":"BMW TECHWORKS ROMANIA S.R.L.","brand":"BMW TechWorks Romania","status":"activ","location":["Cluj-Napoca"],"website":["https://www.bmwtechworks.ro"],"career":["https://careers.bmwtechworks.ro/jobs"],"lastScraped":"2026-06-07","scraperFile":"https://raw.githubusercontent.com/sebiboga/bmw-techworks-romania-nodejs-scraper/main/.github/workflows/scrape.yml"}]' > company_data.json
+            
+            curl -s --user "${SOLR_AUTH}" \
+              "https://solr.peviitor.ro/solr/company/update/json?commit=true" \
+              -X POST \
+              -H "Content-Type: application/json" \
+              --data-binary @company_data.json
+          else
+            echo "BMW already exists in company core - no action needed"
+          fi
+          
+          FINAL=$(curl -s --user "${SOLR_AUTH}" \
+            "https://solr.peviitor.ro/solr/company/select?q=id:49775344&rows=1" | jq '.response.numFound')
+          
+          echo "BMW count after check: $FINAL"
+          
+          if [ "$FINAL" -ge "1" ]; then
+            echo "✅ SUCCESS: BMW is in company core"
+          else
+            echo "❌ FAILED: BMW still not in company core"
+            exit 1
+          fi
+
+  Automation-Tests:
+    runs-on: ubuntu-latest
+    needs: ensure-company-core
+    
+    steps:
+      - uses: actions/checkout@v5
+        
+      - name: Setup Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version: '24'
+          
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run Unit Tests
+        run: |
+          npm run test:unit
+          mv test-report.html test-results-unit.html
+        env:
+          SOLR_AUTH: ${{ secrets.SOLR_AUTH }}
+          
+      - name: Upload Unit Test Results
+        uses: actions/upload-artifact@v7
+        with:
+          name: unit-test-results
+          path: test-results-unit.html
+          retention-days: 30
+
+      - name: Run Integration Tests
+        run: |
+          npm run test:integration
+          mv test-report.html test-results-integration.html
+        env:
+          SOLR_AUTH: ${{ secrets.SOLR_AUTH }}
+          
+      - name: Upload Integration Test Results
+        uses: actions/upload-artifact@v7
+        with:
+          name: integration-test-results
+          path: test-results-integration.html
+          retention-days: 30
+
+      - name: Run E2E Tests
+        run: |
+          npm run test:e2e
+          mv test-report.html test-results-e2e.html
+        env:
+          SOLR_AUTH: ${{ secrets.SOLR_AUTH }}
+          
+      - name: Upload E2E Test Results
+        uses: actions/upload-artifact@v7
+        with:
+          name: e2e-test-results
+          path: test-results-e2e.html
+          retention-days: 30

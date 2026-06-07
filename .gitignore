@@ -1,47 +1,50 @@
 # Dependencies
 node_modules/
 
-# Environment
+# Environment files
 .env
 .env.local
 .env.*.local
 
-# Temp / output
-tmp/
-tmp/*.json
-company.json
-
-# Build / output
+# Build outputs
 dist/
 build/
-out/
 
-# Test reports
+# Test outputs
 test-report.html
-test-report.xml
+test-results*.html
 coverage/
-*. coverage/
-
-# OS
-.DS_Store
-Thumbs.db
-*.swp
-*.swo
-*~
-
-# IDE
-.vscode/
-.idea/
-*.iml
-.project
-.classpath
-.settings/
 
 # Logs
+logs/
 *.log
 npm-debug.log*
 
-# Credentials
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+
+# Job data files (should not be committed)
+jobs.json
+jobs_bmw_ro.json
+jobs_existing.json
+jobs_valid.json
+company_data.json
+delete.json
+bmw_response.json
+
+# Credentials (NEVER commit these)
 *.pem
 *.key
-*.cert
+credentials.json
