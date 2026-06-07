@@ -23,7 +23,7 @@ Pentru fiecare job găsit, se face un request `HEAD` către URL-ul său:
 
 Un job are nevoie de reparație dacă:
 
-- `company` ≠ `"BMW TECHWORKS ROMANIA SRL"` (denumire incompletă)
+- `company` ≠ `"BMW TECHWORKS ROMANIA S.R.L."` (denumire incompletă)
 - `cif` ≠ `"49775344"` (lipsește CIF-ul)
 
 ### 4. Reparare (delete + re-insert)

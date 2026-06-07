@@ -1,11 +1,11 @@
 import fetch from "node-fetch";
 import fs from "fs";
 import { querySOLR, deleteJobsByCIF } from "./solr.js";
-import { getCompanyFromANAF } from "./src/anaf.js";
+import { getCompanyFromANAF, searchCompany } from "./src/anaf.js";
 
 const Peviitor_API_URL = "https://api.peviitor.ro/v1/company/";
-const COMPANY_CIF = "49775344";
 const COMPANY_BRAND = "BMW TechWorks Romania";
+const COMPANY_CIF_FALLBACK = "49775344";
 
 export function getCompanyBrand() {
   return COMPANY_BRAND;
@@ -84,8 +84,19 @@ async function getCompanyData() {
     };
   }
 
-  console.log(`Fetching company data for CIF: ${COMPANY_CIF}`);
-  const anafData = await getCompanyFromANAF(COMPANY_CIF);
+  console.log(`=== Step 2: Search DemoANAF by brand ===\n`);
+  console.log(`Searching for: "${COMPANY_BRAND}"`);
+  const searchResults = await searchCompany(COMPANY_BRAND);
+  const bestMatch = searchResults?.[0];
+  if (!bestMatch || !bestMatch.cui) {
+    throw new Error(`Company not found in DemoANAF: "${COMPANY_BRAND}"`);
+  }
+  const discoveredCif = bestMatch.cui.toString();
+  console.log(`Found: ${bestMatch.name} (CIF: ${discoveredCif})`);
+
+  console.log(`\n=== Step 3: Get company details from ANAF ===\n`);
+  console.log(`Fetching details for CIF: ${discoveredCif}`);
+  const anafData = await getCompanyFromANAF(discoveredCif);
   if (!anafData) throw new Error("No data from ANAF");
   if (!anafData.name) throw new Error("ANAF returned no company name");
 
@@ -105,11 +116,7 @@ export async function validateAndGetCompany() {
   console.log("=== Step 1: Validate company via ANAF ===\n");
   const { company, cif, active, anafData } = await getCompanyData();
 
-  console.log("\n=== Step 2: Check existing jobs in SOLR ===\n");
-  const solrResult = await querySOLR(cif);
-  console.log(`Jobs found in SOLR for CIF ${cif}: ${solrResult.numFound}`);
-
-  console.log("\n=== Step 3: Validate via Peviitor ===\n");
+  console.log("\n=== Step 4: Validate via Peviitor ===\n");
   let peviitorData = null;
   try {
     peviitorData = await getCompanyFromPeviitor();
@@ -117,6 +124,10 @@ export async function validateAndGetCompany() {
   } catch (e) {
     console.log("Peviitor API error:", e.message);
   }
+
+  console.log("\n=== Step 5: Check existing jobs in SOLR ===\n");
+  const solrResult = await querySOLR(cif);
+  console.log(`Jobs found in SOLR for CIF ${cif}: ${solrResult.numFound}`);
 
   saveCompanyData(anafData, peviitorData);
 

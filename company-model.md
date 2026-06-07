@@ -20,7 +20,7 @@
 ```json
 {
   "id": "49775344",
-  "company": "BMW TECHWORKS ROMANIA SRL",
+  "company": "BMW TECHWORKS ROMANIA S.R.L.",
   "brand": "BMW TechWorks Romania",
   "status": "activ",
   "location": ["Cluj-Napoca"],
