@@ -89,8 +89,6 @@ function mapToJobModel(item, cif, companyName) {
 
 async function main() {
   try {
-    fs.mkdirSync("tmp", { recursive: true });
-
     console.log("=== Step 1: Get existing jobs count ===");
     const existingResult = await querySOLR(COMPANY_CIF);
     const existingCount = existingResult.numFound;
@@ -133,8 +131,8 @@ async function main() {
       jobs
     };
 
-    fs.writeFileSync("tmp/jobs.json", JSON.stringify(payload, null, 2), "utf-8");
-    console.log("Saved tmp/jobs.json");
+    fs.writeFileSync("jobs.json", JSON.stringify(payload, null, 2), "utf-8");
+    console.log("Saved jobs.json");
 
     console.log("\n=== Step 4: Upsert jobs to SOLR ===");
     await upsertJobs(jobs);
