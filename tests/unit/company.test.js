@@ -7,7 +7,7 @@ jest.unstable_mockModule('node-fetch', () => ({
   default: mockFetch
 }));
 
-const COMPANY_JSON_PATH = 'company.json';
+const COMPANY_JSON_PATH = 'tmp/company.json';
 
 function backupCompanyJson() {
   if (fs.existsSync(COMPANY_JSON_PATH)) {
@@ -77,6 +77,7 @@ describe('company.js', () => {
 
   beforeAll(async () => {
     process.env.SOLR_AUTH = 'test:test';
+    fs.mkdirSync('tmp', { recursive: true });
     savedCompanyJson = backupCompanyJson();
     company = await import('../../company.js');
   });
@@ -178,6 +179,7 @@ describe('company.js', () => {
     };
 
     beforeEach(() => {
+      fs.mkdirSync('tmp', { recursive: true });
       fs.writeFileSync(COMPANY_JSON_PATH, JSON.stringify(cachedData), 'utf-8');
     });
 
@@ -192,6 +194,12 @@ describe('company.js', () => {
   });
 
   describe('validateAndGetCompany', () => {
+    afterEach(() => {
+      if (fs.existsSync(COMPANY_JSON_PATH)) {
+        fs.unlinkSync(COMPANY_JSON_PATH);
+      }
+    });
+
     it('should return company data with status active', async () => {
       mockFetch
         .mockResolvedValueOnce(anafSearchResponse([
